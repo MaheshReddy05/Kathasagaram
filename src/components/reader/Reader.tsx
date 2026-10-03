@@ -3,13 +3,13 @@
 import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useAudio } from "@/components/audio/AudioProvider";
 import { BookmarkButton } from "@/components/story/BookmarkButton";
 import { StoryPager } from "@/components/story/StoryPager";
 import { ArtImage } from "@/components/ui/ArtImage";
 import { Ornament } from "@/components/ui/Ornament";
-import type { Lang, Story, StoryBlock, StorySummary } from "@/data/types";
+import { LANGS, type Lang, type Story, type StoryBlock, type StorySummary } from "@/data/types";
 import { cn, pad2 } from "@/lib/cn";
 import { library, read } from "@/lib/storage";
 import { useHydrated, useLibrary } from "@/lib/use-library";
@@ -22,8 +22,18 @@ interface ReaderProps {
   collectionName: string;
   prev?: StorySummary;
   next?: StorySummary;
-  /** Language requested via ?lang= (e.g. from "Read along"). */
-  urlLang?: Lang;
+}
+
+const noopSubscribe = () => () => {};
+
+/** Language requested via ?lang= (e.g. from "Read along"). Read client-side so the page stays static. */
+function useUrlLang(): Lang | undefined {
+  const value = useSyncExternalStore(
+    noopSubscribe,
+    () => new URLSearchParams(window.location.search).get("lang"),
+    () => null,
+  );
+  return LANGS.includes(value as Lang) ? (value as Lang) : undefined;
 }
 
 const clamp01 = (n: number) => Math.min(1, Math.max(0, n));
@@ -32,9 +42,10 @@ const clamp01 = (n: number) => Math.min(1, Math.max(0, n));
  * The immersive reader. Owns its own chrome (top & bottom bars that recede
  * while reading), language switching, type size, theme, and local progress.
  */
-export function Reader({ story, characterName, characterSlug, collectionName, prev, next, urlLang }: ReaderProps) {
+export function Reader({ story, characterName, characterSlug, collectionName, prev, next }: ReaderProps) {
   const router = useRouter();
   const hydrated = useHydrated();
+  const urlLang = useUrlLang();
   const prefs = useLibrary("prefs");
   const audio = useAudio();
 

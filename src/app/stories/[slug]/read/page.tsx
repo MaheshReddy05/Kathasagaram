@@ -2,17 +2,21 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Reader } from "@/components/reader/Reader";
 import { TrackVisit } from "@/components/TrackVisit";
-import { LANGS, type Lang } from "@/data/types";
-import { getAdjacentStories, getCharacterById, getCollectionById, getStory } from "@/lib/content";
+import { getAdjacentStories, getCharacterById, getCollectionById, getStory, getStorySummaries } from "@/lib/content";
+
+export const dynamicParams = false;
+
+export async function generateStaticParams() {
+  return (await getStorySummaries()).map((s) => ({ slug: s.slug }));
+}
 
 export async function generateMetadata({ params }: PageProps<"/stories/[slug]/read">): Promise<Metadata> {
   const story = await getStory((await params).slug);
   return story ? { title: `Reading · ${story.title.en}` } : {};
 }
 
-export default async function ReadPage({ params, searchParams }: PageProps<"/stories/[slug]/read">) {
-  const [{ slug }, query] = await Promise.all([params, searchParams]);
-  const story = await getStory(slug);
+export default async function ReadPage({ params }: PageProps<"/stories/[slug]/read">) {
+  const story = await getStory((await params).slug);
   if (!story) notFound();
   const [character, collection, { prev, next }] = await Promise.all([
     getCharacterById(story.characterId),
@@ -20,8 +24,6 @@ export default async function ReadPage({ params, searchParams }: PageProps<"/sto
     getAdjacentStories(story),
   ]);
   if (!character || !collection) notFound();
-
-  const urlLang = LANGS.includes(query.lang as Lang) ? (query.lang as Lang) : undefined;
 
   return (
     <>
@@ -34,7 +36,6 @@ export default async function ReadPage({ params, searchParams }: PageProps<"/sto
         collectionName={collection.title.en}
         prev={prev}
         next={next}
-        urlLang={urlLang}
       />
     </>
   );

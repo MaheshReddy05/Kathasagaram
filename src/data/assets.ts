@@ -1,3 +1,4 @@
+import { publicPath } from "@/lib/public-path";
 import type { Artwork } from "./types";
 
 /**
@@ -19,7 +20,7 @@ const art = (
   height: number,
   alt: string,
   extra: Partial<Artwork> = {},
-): Artwork => ({ src, width, height, alt, ...extra });
+): Artwork => ({ src: publicPath(src), width, height, alt, ...extra });
 
 export const brandAssets = {
   logoFull: art("/images/brand/logo-full.webp", 1200, 800, "Kathasagaram — stories without borders"),

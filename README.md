@@ -14,7 +14,11 @@ npm run lint
 npm run typecheck
 ```
 
-Requires Node 20+.
+Requires Node 20+. The app builds as a fully static site (`out/`).
+
+## GitHub Pages
+
+`.github/workflows/deploy-pages.yml` builds and deploys on every push to `main`. One-time setup: in the repo's **Settings → Pages**, set **Source** to **GitHub Actions**. The site is served at `https://<owner>.github.io/<repo>/`; the workflow passes that sub-path to the build as `NEXT_PUBLIC_BASE_PATH`, and all asset paths go through `src/lib/public-path.ts`.
 
 ## Routes
 
@@ -23,7 +27,7 @@ Requires Node 20+.
 | `/` | Home: Karna hero, continue your journey, stories rail, Mahabharata, spotlight, originals teaser |
 | `/characters/karna` | Character page: overview, identity, divine gifts, names & titles, timeline, relationships, stories |
 | `/stories/[slug]` | Story landing: art, Read / Listen / Bookmark, opening lines, timeline context, prev/next |
-| `/stories/[slug]/read` | Immersive reader: EN ↔ తెలుగు, text size, themes, progress, bookmark, resume. Accepts `?lang=te` |
+| `/stories/[slug]/read` | Immersive reader: EN ↔ తెలుగు, text size, themes, progress, bookmark, resume. Accepts `?lang=te` (read client-side) |
 | `/stories/[slug]/listen` | Full audio player: language, scrubber, ±15s, speed, prev/next, up next |
 | `/explore` | Mahabharata collection, story search (English & Telugu), coming-soon collections |
 | `/library` | Continue reading, continue listening, bookmarks, recently viewed (all local) |

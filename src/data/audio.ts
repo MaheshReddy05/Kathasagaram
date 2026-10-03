@@ -1,3 +1,4 @@
+import { publicPath } from "@/lib/public-path";
 import type { AudioSource, StoryAudio } from "./types";
 
 /**
@@ -27,9 +28,10 @@ const NARRATION: Record<string, StoryAudio> = {};
 /** Audio for a story: recorded narration where it exists, demo audio otherwise. */
 export function audioForStory(slug: string): StoryAudio {
   const recorded = NARRATION[slug] ?? {};
+  const resolve = (source: AudioSource): AudioSource => ({ ...source, src: publicPath(source.src) });
   return {
-    en: recorded.en ?? DEMO_AUDIO.en,
-    te: recorded.te ?? DEMO_AUDIO.te,
+    en: resolve(recorded.en ?? DEMO_AUDIO.en),
+    te: resolve(recorded.te ?? DEMO_AUDIO.te),
   };
 }
 
